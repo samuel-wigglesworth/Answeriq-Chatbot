@@ -1,0 +1,13 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "chatbot"
+resolve_s3 = true
+s3_prefix = "chatbot"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+image_repositories = []
+parameter_overrides = "GeminiApiKey=\"AQ.Ab8RN6K9hLi4w68mQsfbilJKqV9-3jhbjtXANreSWaA7J2B4Qw\""
+
+[default.global.parameters]
+region = "us-east-1"
