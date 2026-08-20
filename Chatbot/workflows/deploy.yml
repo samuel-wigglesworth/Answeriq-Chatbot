@@ -1,0 +1,40 @@
+name: Deploy Chatbot Web App to AWS Free Tier
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Setup AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Sync Frontend Assets to Amazon S3
+        run: |
+          aws s3 sync . s3://answeriq-chatbot-public-web-bucket \
+            --delete \
+            --exclude ".git*" \
+            --exclude ".github/*" \
+            --exclude "backend/*" \
+            --exclude ".aws-sam/*" \
+            --exclude "samconfig.toml" \
+            --exclude "template.yaml" \
+            --exclude "VERIFICATION.md" \
+            --exclude "README.md"
+
+      - name: Set S3 Bucket Website Configuration
+        run: |
+          aws s3 website s3://answeriq-chatbot-public-web-bucket \
+            --index-document index.html \
+            --error-document index.html
+
