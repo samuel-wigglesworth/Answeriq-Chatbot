@@ -1,4 +1,4 @@
-name: Continuous Free Deployment to AWS S3
+name: Deploy Chatbot Web App to AWS Free Tier
 
 on:
   push:
@@ -19,8 +19,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Sync Files to S3 Bucket
+      - name: Sync Frontend Assets to Amazon S3
         run: |
           aws s3 sync . s3://answeriq-chatbot-public-web-bucket --delete --exclude ".git*"
+
 
 
