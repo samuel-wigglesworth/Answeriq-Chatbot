@@ -116,13 +116,13 @@ git push -u origin main
 ### Part 2: Deploy Backend (AWS Lambda with SAM)
 
 #### Prerequisites
-- **AWS CLI** installed and configured with credentials ([Install Guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html))
-- **AWS SAM CLI** installed ([Install Guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html))
+- **AWS CLI** installed and configured with credentials (refer to the AWS CLI User Guide for installation instructions)
+- **AWS SAM CLI** installed (refer to the AWS Serverless Application Model Developer Guide for installation)
 
 #### Setup AWS Credentials (First Time Only)
 
 1. **Get your AWS Access Keys**:
-   - Go to [AWS Console](https://console.aws.amazon.com/)
+   - Go to AWS Console (sign in to your AWS account)
    - Click your username (top right) → **Security credentials**
    - Scroll to **Access keys** → **Create access key**
    - Choose **Command Line Interface (CLI)** → check the box → **Next**
@@ -193,7 +193,7 @@ sam deploy
 ### Part 3: Deploy Frontend (AWS Amplify)
 
 1. **Go to [AWS Amplify Console](https://console.aws.amazon.com/amplify)**
-
+1. **Go to AWS Amplify Console** (search for "Amplify" in your AWS Console)
 2. **Click "New App" → "Host web app"**
 
 3. **Connect your GitHub repository**:
@@ -303,7 +303,7 @@ composite = (
 
 For enhanced, AI-generated suggestions:
 
-1. Get a free API key at [Google AI Studio](https://aistudio.google.com/app/apikey)
+1. Get a free API key from Google AI Studio (search for "Google AI Studio API key" to access the service)
 2. Add it in one of three ways:
    - **Frontend Settings**: Click ⚙ Settings → paste key
    - **Lambda Environment**: Set `GEMINI_API_KEY` in AWS Lambda console
