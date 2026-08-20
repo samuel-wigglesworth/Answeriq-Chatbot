@@ -6,7 +6,9 @@ const DEFAULT_API_URL = 'http://localhost:5000/evaluate';
 // ─── State ──────────────────────────────────────────────────────────
 let sessionHistory = JSON.parse(localStorage.getItem('sb_history') || '[]');
 let currentApiKey  = localStorage.getItem('sb_api_key') || '';
+let currentAwsRegion = localStorage.getItem('sb_aws_region') || '';
 let currentApiUrl  = localStorage.getItem('sb_api_url') || '';
+let aiProvider     = localStorage.getItem('sb_ai_provider') || 'none';
 
 // ─── DOM refs ────────────────────────────────────────────────────────
 const questionInput    = document.getElementById('question_input');
@@ -40,10 +42,15 @@ const missingTags     = document.getElementById('missing-tags');
 // Settings modal
 const settingsBtn       = document.getElementById('settings-btn');
 const settingsModal     = document.getElementById('settings-modal');
+const aiProviderSelect  = document.getElementById('ai-provider-select');
 const apiKeyInput       = document.getElementById('api-key-input');
+const apiKeyLabel       = document.getElementById('api-key-label');
+const awsRegionInput    = document.getElementById('aws-region-input');
+const awsRegionGroup    = document.getElementById('aws-region-group');
 const apiUrlInput       = document.getElementById('api-url-input');
 const saveSettingsBtn   = document.getElementById('save-settings-btn');
 const cancelSettingsBtn = document.getElementById('cancel-settings-btn');
+const geminiKeyGroup    = document.getElementById('gemini-key-group');
 
 // Ring geometry
 const RING_R  = 44;
@@ -85,14 +92,40 @@ userAnswerInput.addEventListener('input', () => {
 // ─── Settings ────────────────────────────────────────────────────────
 settingsBtn.addEventListener('click', () => {
   apiKeyInput.value = currentApiKey;
+  awsRegionInput.value = currentAwsRegion;
   apiUrlInput.value = currentApiUrl;
+  aiProviderSelect.value = aiProvider;
+  updateAIProviderFields();
   settingsModal.classList.add('open');
 });
+
+aiProviderSelect.addEventListener('change', updateAIProviderFields);
+
+function updateAIProviderFields() {
+  const provider = aiProviderSelect.value;
+  
+  if (provider === 'gemini') {
+    geminiKeyGroup.classList.remove('hidden');
+    awsRegionGroup.classList.add('hidden');
+    apiKeyLabel.textContent = 'Gemini API Key';
+  } else if (provider === 'bedrock') {
+    geminiKeyGroup.classList.add('hidden');
+    awsRegionGroup.classList.remove('hidden');
+  } else {
+    geminiKeyGroup.classList.add('hidden');
+    awsRegionGroup.classList.add('hidden');
+  }
+}
+
 cancelSettingsBtn.addEventListener('click', () => settingsModal.classList.remove('open'));
 settingsModal.addEventListener('click', e => {
   if (e.target === settingsModal) settingsModal.classList.remove('open');
 });
 saveSettingsBtn.addEventListener('click', () => {
+  aiProvider = aiProviderSelect.value;
+  localStorage.setItem('sb_ai_provider', aiProvider);
+  currentAwsRegion = awsRegionInput.value.trim();
+  localStorage.setItem('sb_aws_region', currentAwsRegion);
   currentApiKey = apiKeyInput.value.trim();
   currentApiUrl = apiUrlInput.value.trim() || DEFAULT_API_URL;
   localStorage.setItem('sb_api_key', currentApiKey);
@@ -169,15 +202,25 @@ clearHistBtn && clearHistBtn.addEventListener('click', () => {
 async function evaluateAnswer(question, reference, userAnswer) {
   const url = getApiUrl();
   const response = await fetch(url, {
+  
+  // Build request body based on AI provider
+  const requestBody = {
+    question,
+    reference_answer: reference,
+    user_answer_1: userAnswer,
+  };
+  
+  // Add AI provider specific parameters
+  if (aiProvider === 'gemini' && currentApiKey) {
+    requestBody.gemini_api_key = currentApiKey;
+  } else if (aiProvider === 'bedrock' && currentAwsRegion) {
+    requestBody.aws_bedrock_region = currentAwsRegion;
+  }
+  
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      question,
-      reference_answer: reference,
-      user_answer_1: userAnswer,
-      gemini_api_key: currentApiKey || undefined,
-    }),
-  });
+    body: JSON.stringify(requestBody),
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {

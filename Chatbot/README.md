@@ -1,6 +1,6 @@
 # AnswerIQ — AI-Powered Answer Evaluator
 
-An intelligent tool that evaluates subjective answers by comparing them to reference answers. Get instant scores (out of 10) plus AI-powered improvement suggestions.
+An intelligent tool that evaluates subjective answers by comparing them to reference answers. Get instant scores (out of 10) plus AI-powered improvement suggestions using Google Gemini or Amazon Bedrock.
 
 ## What Does It Do?
 
@@ -77,7 +77,8 @@ Open **http://localhost:8080** in your browser.
 
 1. Click **⚙ Settings** in the top-right
 2. Set **API URL** to: `http://localhost:5000/evaluate`
-3. (Optional) Add a **Gemini API Key** for enhanced AI suggestions
+3. (Optional) Choose an **AI Provider** (Gemini or Bedrock) for enhanced AI suggestions
+   - For Gemini: Add your API key from Google AI Studio
 4. Click **Save**
 
 ### 5. Try It Out
@@ -299,15 +300,29 @@ composite = (
 
 ---
 
-## 🔐 Optional: Gemini AI Integration
+## 🔐 Optional: AI Enhancement Integration
 
-For enhanced, AI-generated suggestions:
+AnswerIQ supports multiple AI providers for enhanced suggestions:
+
+### Option 1: Google Gemini
+
+For enhanced, AI-generated suggestions using Google Gemini:
 
 1. Get a free API key at [Google AI Studio](https://aistudio.google.com/app/apikey)
-2. Add it in one of three ways:
-   - **Frontend Settings**: Click ⚙ Settings → paste key
+2. Configure it:
+   - **Frontend Settings**: Click ⚙ Settings → select "Google Gemini" → paste key
    - **Lambda Environment**: Set `GEMINI_API_KEY` in AWS Lambda console
    - **SAM Deployment**: Pass `--parameter-overrides GeminiApiKey=AIza...` during `sam deploy`
+
+### Option 2: Amazon Bedrock (Claude)
+
+For enhanced suggestions using Amazon Bedrock with Claude models:
+
+1. **On AWS Lambda**: Bedrock uses the Lambda's IAM role automatically (permissions already in template.yaml)
+2. **Local Development**: Configure AWS credentials with `aws configure`
+3. Configure the region:
+   - **Frontend Settings**: Click ⚙ Settings → select "Amazon Bedrock" → enter region (e.g., us-east-1)
+   - **SAM Deployment**: Pass `--parameter-overrides AWSBedrockRegion=us-east-1` during `sam deploy`
 
 Without a Gemini key, the app uses rule-based suggestions (still highly effective).
 
@@ -318,7 +333,7 @@ Without a Gemini key, the app uses rule-based suggestions (still highly effectiv
 - **Frontend**: HTML5, CSS3 (Glassmorphism), Vanilla JavaScript
 - **Backend**: Python 3.12, Flask (local), AWS Lambda (production)
 - **ML Library**: scikit-learn (TF-IDF, cosine similarity)
-- **AI Enhancement**: Google Gemini 2.0 Flash (optional)
+- **AI Enhancement**: Google Gemini 2.0 Flash, Amazon Bedrock Claude 3 Haiku (optional)
 - **Deployment**: AWS Amplify (frontend), AWS Lambda + SAM (backend)
 
 ---

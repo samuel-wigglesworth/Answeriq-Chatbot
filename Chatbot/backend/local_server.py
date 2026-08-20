@@ -1,5 +1,5 @@
 """
-Local development server for the AnswerIQ Python evaluator.
+Local development server for the AnswerIQ Python evaluator with AI enhancements.
 Run: python local_server.py
 """
 
@@ -36,11 +36,14 @@ class EvaluateHandler(BaseHTTPRequestHandler):
         raw = self.rfile.read(length).decode("utf-8")
         try:
             payload = json.loads(raw)
+            gemini_key = payload.get("gemini_api_key") or os.environ.get("GEMINI_API_KEY", "")
+            aws_region = payload.get("aws_bedrock_region") or os.environ.get("AWS_BEDROCK_REGION", "")
             result = evaluate_answer(
                 payload.get("question", ""),
                 payload.get("reference_answer", ""),
                 payload.get("user_answer_1", ""),
-                payload.get("gemini_api_key") or os.environ.get("GEMINI_API_KEY"),
+                gemini_key if gemini_key else None,
+                aws_region if aws_region else None,
             )
             body = json.dumps(result).encode("utf-8")
             self.send_response(200)

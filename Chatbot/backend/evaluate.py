@@ -1,5 +1,5 @@
 """
-Subjective answer evaluator using scikit-learn for semantic context matching.
+Subjective answer evaluator using scikit-learn for semantic context matching with AI enhancements.
 Compares the user's answer to a reference answer via TF-IDF cosine similarity,
 then derives sub-scores, missing concepts, and improvement suggestions.
 """
@@ -15,6 +15,14 @@ from typing import Any
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+
+# Try to import boto3 for Bedrock support (optional)
+try:
+    import boto3
+    BEDROCK_AVAILABLE = True
+except ImportError:
+    BEDROCK_AVAILABLE = False
+
 
 # ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -268,6 +276,65 @@ STUDENT ANSWER: {user_answer}
     return None
 
 
+def _maybe_bedrock_suggestions(
+    question: str,
+    reference: str,
+    user_answer: str,
+    aws_region: str | None = None,
+) -> list[str] | None:
+    """Call Amazon Bedrock with Claude to generate AI suggestions."""
+    if not aws_region or not BEDROCK_AVAILABLE:
+        return None
+
+    prompt = f"""You are an academic tutor. A student answered a subjective question.
+Return ONLY a JSON array of 3 short, specific improvement suggestions (strings).
+No markdown, no extra text.
+
+QUESTION: {question}
+REFERENCE ANSWER: {reference}
+STUDENT ANSWER: {user_answer}
+"""
+
+    try:
+        bedrock = boto3.client(
+            service_name='bedrock-runtime',
+            region_name=aws_region,
+        )
+        
+        # Use Claude 3 Haiku (fast and cost-effective)
+        body = json.dumps({
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 512,
+            "temperature": 0.4,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        })
+        
+        response = bedrock.invoke_model(
+            modelId="anthropic.claude-3-haiku-20240307-v1:0",
+            body=body
+        )
+        
+        response_body = json.loads(response['body'].read())
+        text = response_body['content'][0]['text']
+        
+        # Parse the JSON response
+        clean = re.sub(r"```json\s*|```", "", text).strip()
+        parsed = json.loads(clean)
+        if isinstance(parsed, list) and all(isinstance(x, str) for x in parsed):
+            return parsed[:4]
+    except Exception:
+        # Silently fail if Bedrock is not available or configured
+        # Fall back to rule-based suggestions
+        return None
+    
+    return None
+
+
 @dataclass
 class EvaluationResult:
     score: int
@@ -338,9 +405,14 @@ def evaluate_answer(
     suggestions = _build_suggestions(question, reference, user_answer, missing, breakdown, similarity)
 
     ai_suggestions = _maybe_gemini_suggestions(question, reference, user_answer, gemini_api_key)
+    # Try AI-enhanced suggestions (Gemini or Bedrock)
     if ai_suggestions:
         suggestions = ai_suggestions
 
+    else:
+        ai_suggestions = _maybe_bedrock_suggestions(question, reference, user_answer, aws_bedrock_region)
+        if ai_suggestions:
+            suggestions = ai_suggestions
     result = EvaluationResult(
         score=score,
         grade=_grade_from_score(score),

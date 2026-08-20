@@ -225,7 +225,7 @@
   <div class="modal">
     <h2 id="modal-title" class="modal-title">⚙ Settings</h2>
     <p class="modal-desc">
-      Configure the Python evaluator API and an optional Gemini key for richer AI suggestions.
+      Configure the Python evaluator API and choose an AI provider for enhanced suggestions.
       Settings are saved only in your browser (localStorage).
     </p>
 
@@ -244,6 +244,19 @@
     </div>
 
     <div class="modal-field">
+      <label for="ai-provider-select">AI Enhancement Provider</label>
+      <select id="ai-provider-select">
+        <option value="none">None (Rule-based suggestions only)</option>
+        <option value="gemini">Google Gemini</option>
+        <option value="bedrock">Amazon Bedrock (Claude)</option>
+      </select>
+      <p class="api-hint">
+        Choose an AI provider for enhanced suggestions. Rule-based works without any API keys.
+      </p>
+    </div>
+
+    <div id="gemini-key-group" class="modal-field hidden">
+      <label for="api-key-input" id="api-key-label">Gemini API Key</label>
       <label for="api-key-input">Gemini API Key (optional)</label>
       <input
         type="password"
@@ -258,6 +271,22 @@
           aistudio.google.com
         </a>
         (free tier available).
+      </p>
+    </div>
+
+    <div id="aws-region-group" class="modal-field hidden">
+      <label for="aws-region-input">AWS Region for Bedrock</label>
+      <input
+        type="text"
+        id="aws-region-input"
+        placeholder="us-east-1"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <p class="api-hint">
+        When deployed on AWS Lambda, Bedrock will use the Lambda's IAM role automatically.
+        Local development requires AWS credentials via <code>aws configure</code>.
+        Enter the AWS region where Bedrock is available (e.g., us-east-1, us-west-2).
       </p>
     </div>
 
