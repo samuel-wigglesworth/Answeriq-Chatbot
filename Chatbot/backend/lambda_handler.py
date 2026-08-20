@@ -1,5 +1,5 @@
 """
-AWS Lambda handler for AnswerIQ evaluation API.
+AWS Lambda handler for AnswerIQ evaluation API with Gemini and Amazon Bedrock support.
 Deploy with SAM template.yaml or as a Lambda Function URL.
 """
 
@@ -45,10 +45,13 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     question = payload.get("question", "")
     reference = payload.get("reference_answer", "")
     user_answer = payload.get("user_answer_1", "")
-    gemini_key = payload.get("gemini_api_key") or os.environ.get("GEMINI_API_KEY")
+    gemini_key = payload.get("gemini_api_key") or os.environ.get("GEMINI_API_KEY", "")
+    aws_region = payload.get("aws_bedrock_region") or os.environ.get("AWS_BEDROCK_REGION", "")
 
     try:
-        result = evaluate_answer(question, reference, user_answer, gemini_key)
+        result = evaluate_answer(question, reference, user_answer, 
+                                gemini_key if gemini_key else None, 
+                                aws_region if aws_region else None)
         return _response(200, result)
     except ValueError as exc:
         return _response(400, {"error": str(exc)})

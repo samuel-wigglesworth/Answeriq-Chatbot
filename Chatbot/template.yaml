@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: AnswerIQ - Python subjective answer evaluator with Lambda Function URL
+Description: AnswerIQ - Python subjective answer evaluator with AI enhancements (Gemini and Amazon Bedrock)
 
 Globals:
   Function:
@@ -14,6 +14,11 @@ Parameters:
     Default: 'NONE'
     Description: Optional Gemini API key for AI-enhanced suggestions
 
+  AWSBedrockRegion:
+    Type: String
+    Default: 'NONE'
+    Description: Optional AWS region for Amazon Bedrock (e.g., us-east-1, us-west-2)
+
 Resources:
   EvaluateFunction:
     Type: AWS::Serverless::Function
@@ -23,10 +28,17 @@ Resources:
       Handler: lambda_handler.handler
       Architectures:
         - x86_64
-      Description: Scores subjective answers using scikit-learn
+      Description: Scores subjective answers using scikit-learn with AI enhancements
       Environment:
         Variables:
           GEMINI_API_KEY: !Ref GeminiApiKey
+          AWS_BEDROCK_REGION: !Ref AWSBedrockRegion
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+              Resource: '*'
       FunctionUrlConfig:
         AuthType: NONE
         Cors:
