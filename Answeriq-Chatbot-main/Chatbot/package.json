@@ -1,0 +1,29 @@
+{
+  "name": "answeriq-chatbot",
+  "version": "2.0.0",
+  "description": "AI-powered subjective answer evaluator for Cloudflare Pages",
+  "type": "module",
+  "scripts": {
+    "dev": "npx wrangler pages dev public",
+    "deploy": "npx wrangler pages deploy public --project-name=answeriq-chatbot",
+    "serve": "npx serve public",
+    "preview": "npm run serve"
+  },
+  "keywords": [
+    "ai",
+    "evaluation",
+    "education",
+    "cloudflare",
+    "pages",
+    "serverless"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/answeriq-chatbot.git"
+  },
+  "devDependencies": {
+    "wrangler": "^3.80.0"
+  }
+}

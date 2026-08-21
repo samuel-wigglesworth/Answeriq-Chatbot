@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AnswerIQ — Subjective Answer Evaluator</title>
+  <meta name="description" content="Enter any question and reference answer. Submit your own answer and get an AI-powered score out of 10 with detailed improvement suggestions." />
+  <meta property="og:title" content="AnswerIQ — Subjective Answer Evaluator" />
+  <meta property="og:description" content="AI-powered semantic scoring and improvement suggestions for any subjective question." />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%238b5cf6'/><text y='24' x='5' font-size='20'>✦</text></svg>" />
+</head>
+<body>
+
+<!-- Animated background -->
+<div class="bg-orbs" aria-hidden="true"></div>
+
+<!-- ── HEADER ──────────────────────────────────────────────────────── -->
+<header>
+  <div class="logo">
+    <div class="logo-icon" aria-hidden="true">✦</div>
+    AnswerIQ<span>beta</span>
+  </div>
+  <button id="settings-btn" aria-label="Open settings">
+    ⚙ Settings
+  </button>
+</header>
+
+<!-- ── MAIN ───────────────────────────────────────────────────────── -->
+<main class="container">
+
+  <!-- Hero -->
+  <section class="hero" aria-labelledby="hero-heading">
+    <div class="hero-badge">✦ AI-Powered Evaluation</div>
+    <h1 id="hero-heading">Score Any Subjective Answer<br>with AI Precision</h1>
+    <p>
+      Enter any question, provide the reference answer, then type your own response.
+      Get an instant score out of 10 and personalised improvement suggestions.
+    </p>
+  </section>
+
+  <!-- Warning banner (no API key) -->
+  <div id="warning-banner" class="alert alert-warning hidden" role="alert">
+    <span class="alert-icon">⚠️</span>
+    <span class="alert-text"></span>
+  </div>
+
+  <!-- Error banner -->
+  <div id="error-banner" class="alert alert-error hidden" role="alert">
+    <span class="alert-icon">✕</span>
+    <span id="error-text" class="alert-text"></span>
+  </div>
+
+  <!-- ── INPUT CARD ──────────────────────────────────────────────── -->
+  <section class="card" aria-label="Question and answer input">
+    <div class="card-title">Question Setup</div>
+
+    <!-- Step A: Question -->
+    <div style="margin-bottom:1.5rem">
+      <div class="step-label">
+        <span class="step-num">A</span>
+        The Question
+      </div>
+      <label for="question_input">Enter the question you want to answer</label>
+      <textarea
+        id="question_input"
+        name="question_input"
+        rows="3"
+        placeholder="e.g. Describe the causes of the French Revolution."
+        aria-required="true"
+      ></textarea>
+    </div>
+
+    <!-- Step B: Reference / Standard Answer -->
+    <div style="margin-bottom:1.5rem">
+      <div class="step-label">
+        <span class="step-num">B</span>
+        Reference Answer
+      </div>
+      <label for="reference_answer">Paste or type the standard / model answer</label>
+      <textarea
+        id="reference_answer"
+        name="reference_answer"
+        rows="4"
+        placeholder="e.g. The French Revolution was caused by financial crisis, social inequality, Enlightenment ideas, food shortages, and weak leadership…"
+        aria-required="true"
+      ></textarea>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- User's Answer -->
+    <div>
+      <div class="step-label">
+        <span class="step-num">✎</span>
+        Your Answer
+      </div>
+      <label for="user_answer_1">Write your answer — be as detailed as you can</label>
+      <textarea
+        id="user_answer_1"
+        name="user_answer_1"
+        placeholder="Start writing your answer here…"
+        aria-required="true"
+      ></textarea>
+      <p class="char-count" id="char-count" aria-live="polite">0 characters</p>
+    </div>
+
+    <div style="margin-top:1.5rem; display:flex; gap:0.75rem; flex-wrap:wrap;">
+      <button class="btn btn-primary" id="submit-btn" aria-label="Evaluate my answer">
+        <span>✦</span> Evaluate My Answer
+      </button>
+      <button class="btn btn-secondary" id="reset-btn" aria-label="Clear all fields">
+        ↺ Clear
+      </button>
+    </div>
+  </section>
+
+  <!-- ── CHATBOT PANEL ───────────────────────────────────────────── -->
+  <section id="chat-section" class="card chat-section hidden" aria-label="Evaluation chatbot">
+    <div class="card-title">AnswerIQ Chat</div>
+    <div id="chat-messages" class="chat-messages" aria-live="polite"></div>
+    <form id="chat-form" class="chat-form">
+      <label for="chat-input" class="sr-only">Type your answer</label>
+      <textarea
+        id="chat-input"
+        rows="2"
+        placeholder="Type your answer here and press Enter…"
+        aria-label="Chat answer input"
+      ></textarea>
+      <button type="submit" class="btn btn-primary" id="chat-send-btn" aria-label="Send answer">
+        Send ↵
+      </button>
+    </form>
+  </section>
+
+  <!-- ── RESULT CARD ─────────────────────────────────────────────── -->
+  <section id="score-section" class="card score-section" aria-label="Evaluation results" aria-live="polite">
+    <div class="card-title">Evaluation Result</div>
+
+    <!-- Score header: ring + meta -->
+    <div class="score-header">
+      <!-- SVG ring with gradient defs -->
+      <div class="score-ring-wrap" role="img" aria-labelledby="score-number">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <defs>
+            <linearGradient id="grad-green" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#10b981"/>
+              <stop offset="100%" stop-color="#06b6d4"/>
+            </linearGradient>
+            <linearGradient id="grad-amber" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#f59e0b"/>
+              <stop offset="100%" stop-color="#f97316"/>
+            </linearGradient>
+            <linearGradient id="grad-red" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#ef4444"/>
+              <stop offset="100%" stop-color="#ec4899"/>
+            </linearGradient>
+          </defs>
+          <circle class="score-ring-bg" cx="60" cy="60" r="44" stroke-width="9"/>
+          <circle
+            id="ring-fill"
+            class="score-ring-fill"
+            cx="60" cy="60" r="44"
+            stroke-width="9"
+            stroke="#8b5cf6"
+          />
+        </svg>
+        <div class="score-label">
+          <div id="score-number" class="score-number">–</div>
+          <div class="score-denom">out of 10</div>
+        </div>
+      </div>
+
+      <div class="score-meta">
+        <div id="score-grade" class="score-grade">–</div>
+        <p id="score-subtitle" class="score-subtitle"></p>
+      </div>
+    </div>
+
+    <!-- Breakdown grid -->
+    <div id="breakdown-grid" class="breakdown-grid" aria-label="Score breakdown"></div>
+
+    <div class="divider"></div>
+
+    <!-- Suggestions -->
+    <div class="suggestions-title">
+      <span class="icon">💡</span> How to Improve Your Answer
+    </div>
+    <ul id="suggestion-list" class="suggestion-list" aria-label="Improvement suggestions"></ul>
+
+    <!-- Missing points -->
+    <div id="missing-section" class="missing-section hidden">
+      <div class="missing-title">Key Points Missing from Your Answer</div>
+      <div id="missing-tags" class="missing-tags" aria-label="Missing concepts"></div>
+    </div>
+
+    <!-- Try again -->
+    <div class="action-row">
+      <button class="btn btn-secondary" id="try-again-btn"
+        onclick="document.getElementById('user_answer_1').focus();
+                 document.getElementById('user_answer_1').scrollIntoView({behavior:'smooth'})">
+        ✎ Revise My Answer
+      </button>
+      <button class="btn btn-secondary" id="new-question-btn"
+        onclick="document.getElementById('reset-btn').click()">
+        ＋ New Question
+      </button>
+    </div>
+  </section>
+
+  <!-- ── HISTORY ─────────────────────────────────────────────────── -->
+  <section id="history-section" class="history-section hidden" aria-label="Session history">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.9rem;">
+      <div class="history-title">Session History</div>
+      <button class="btn btn-ghost" id="clear-hist-btn" aria-label="Clear history">Clear</button>
+    </div>
+    <div id="history-list" class="history-list" aria-label="Previous evaluations"></div>
+  </section>
+
+</main>
+
+<!-- ── SETTINGS MODAL ────────────────────────────────────────────── -->
+<div id="settings-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal">
+    <h2 id="modal-title" class="modal-title">⚙ Settings</h2>
+    <p class="modal-desc">
+      Configure the Cloudflare Worker API endpoint and an optional Gemini key for richer AI suggestions.
+      Settings are saved only in your browser (localStorage).
+    </p>
+
+    <div class="modal-field">
+      <label for="api-url-input">Evaluator API URL (Cloudflare Worker)</label>
+      <input
+        type="url"
+        id="api-url-input"
+        placeholder="https://your-worker.your-subdomain.workers.dev"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <p class="api-hint">
+        Deploy your Cloudflare Worker and paste the URL here.
+      </p>
+    </div>
+
+    <div class="modal-field">
+      <label for="api-key-input">Gemini API Key (optional)</label>
+      <input
+        type="password"
+        id="api-key-input"
+        placeholder="AIza…"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <p class="api-hint">
+        Get a free key at
+        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">
+          aistudio.google.com
+        </a>
+        (free tier available).
+      </p>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-primary" id="save-settings-btn">Save</button>
+      <button class="btn btn-secondary" id="cancel-settings-btn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
