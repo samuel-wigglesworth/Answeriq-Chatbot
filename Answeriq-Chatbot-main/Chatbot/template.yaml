@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AnswerIQ - Python subjective answer evaluator with Lambda Function URL
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Runtime: python3.12
+
+Parameters:
+  GeminiApiKey:
+    Type: String
+    Default: 'NONE'
+    Description: Optional Gemini API key for AI-enhanced suggestions
+
+Resources:
+  EvaluateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: answeriq-evaluate
+      CodeUri: backend/
+      Handler: lambda_handler.handler
+      Architectures:
+        - x86_64
+      Description: Scores subjective answers using scikit-learn
+      Environment:
+        Variables:
+          GEMINI_API_KEY: !Ref GeminiApiKey
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors:
+          AllowOrigins:
+            - '*'
+          AllowMethods:
+            - POST
+          AllowHeaders:
+            - Content-Type
+
+Outputs:
+  FunctionUrl:
+    Description: Paste this URL into AnswerIQ Settings
+    Value: !GetAtt EvaluateFunctionUrl.FunctionUrl
+  FunctionArn:
+    Description: Lambda function ARN
+    Value: !GetAtt EvaluateFunction.Arn

@@ -1,0 +1,12 @@
+[
+  {
+    "id": "quantum-mechanics",
+    "question": "Describe Quantum Mechanics",
+    "reference_answer": "Quantum mechanics is a branch of modern applied physics that describes the behavior of matter and energy at atomic and subatomic scales. Unlike classical physics, it introduces probabilistic outcomes, wave-particle duality, and quantization of energy levels. Key principles include the Schrödinger equation, Heisenberg uncertainty principle, and superposition. It is foundational to technologies such as lasers, semiconductors, and MRI imaging."
+  },
+  {
+    "id": "french-revolution",
+    "question": "Describe the causes of the French Revolution",
+    "reference_answer": "The French Revolution (1789) was caused by a combination of financial crisis, social inequality between the three estates, Enlightenment ideas about liberty and equality, food shortages, and weak leadership under Louis XVI. Heavy taxation on the Third Estate, while nobility and clergy enjoyed privileges, created widespread resentment that erupted into revolution."
+  }
+]
