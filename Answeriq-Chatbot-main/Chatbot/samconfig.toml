@@ -1,0 +1,22 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "chatbot"
+resolve_s3 = true
+s3_prefix = "chatbot"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+image_repositories = [ ]
+parameter_overrides = 'GeminiApiKey="AQ.Ab8RN6K9hLi4w68mQsfbilJKqV9-3jhbjtXANreSWaA7J2B4Qw"'
+
+[default.global.parameters]
+region = "us-east-1"
+stack_name = "answeriq-stack"
+
+[default.sync.parameters]
+template_file = "c:\\Users\\user\\Chatbot\\template.yaml"
+dependency_layer = false
+watch = true
+
+[default.sync.parameters.parameter_overrides]
+GeminiApiKey = "NONE"
